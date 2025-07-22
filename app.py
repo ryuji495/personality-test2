@@ -1,5 +1,4 @@
-import ipywidgets as widgets
-from IPython.display import display, clear_output
+
 
 # 質問と選択肢の設定
 
