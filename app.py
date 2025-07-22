@@ -91,4 +91,5 @@ if answer:
         st.session_state.current_key = "start"
     else:
         st.session_state.current_key = next_key
-        st.experimental_rerun()
+        st.rerun()
+
