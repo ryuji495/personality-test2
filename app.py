@@ -1,7 +1,6 @@
-
+import streamlit as st
 
 # 質問と選択肢の設定
-
 question_tree = {
     "start": {
         "text": "あなたはよく外出をするほうですか？",
@@ -65,52 +64,31 @@ question_tree = {
     "j": "あなたは変人タイプです！",
 }
 
-current_key = "start"
-answers = []
+# セッション状態を使って進行管理
+if 'current_key' not in st.session_state:
+    st.session_state.current_key = "start"
 
-# ウィジェット作成
-question_label = widgets.HTML(value="<b>質問がここに表示されます</b>")
-radio = widgets.RadioButtons(options=["はい", "いいえ"], value=None)
-button = widgets.Button(description="次へ")
-result_output = widgets.Output()
+current_key = st.session_state.current_key
 
-# 表示レイアウト
-display(question_label, radio, button, result_output)
+st.title("性格診断テスト")
+st.markdown(f"**{question_tree[current_key]['text']}**")
 
-# 次へボタンの処理
-def on_next_clicked(b):
-    global current_key, answers
+# ボタンで回答
+col1, col2 = st.columns(2)
+if col1.button("はい"):
+    answer = "yes"
+elif col2.button("いいえ"):
+    answer = "no"
+else:
+    answer = None
 
-    answer = radio.value
-    if answer is None:
-        with result_output:
-            clear_output()
-            print("「はい」か「いいえ」を選んでください。")
-        return
-
-    bit = 1 if answer == "はい" else 0
-    answers.append(bit)
-    next_key = question_tree[current_key]["yes" if bit == 1 else "no"]
-
-    if isinstance(question_tree.get(next_key), str):
-        # 結果を表示
-        question_label.value = "<b>診断結果：</b>"
-        radio.disabled = True
-        button.disabled = True
-        with result_output:
-            clear_output()
-            print(question_tree[next_key])
-           
+# 回答処理
+if answer:
+    next_key = question_tree[current_key][answer]
+    if isinstance(question_tree[next_key], str):
+        st.markdown("### 診断結果")
+        st.success(question_tree[next_key])
+        st.session_state.current_key = "start"
     else:
-        # 次の質問に進む
-        current_key = next_key
-        question_label.value = f"<b>{question_tree[current_key]['text']}</b>"
-        radio.value = None
-        with result_output:
-            clear_output()
-
-# イベント登録
-button.on_click(on_next_clicked)
-
-# 最初の質問表示
-question_label.value = f"<b>{question_tree[current_key]['text']}</b>"
+        st.session_state.current_key = next_key
+        st.experimental_rerun()
